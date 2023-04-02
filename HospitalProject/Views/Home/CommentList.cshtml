@@ -1,0 +1,38 @@
+﻿@using Hospital.Core.Models
+@model List<Comment>
+@{
+    ViewData["Title"] = "CommentList";
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+
+</head>
+<body>
+    <main>
+        <table class="table table-bordered">
+            <tr>
+                <th>Comment Mail</th>
+                <th>Comment Title</th>
+                <th>Comment Text</th>
+            </tr>
+            @foreach (var item in Model)
+            {
+                <tr>                 
+                    <td>@item.CommentMail</td>
+                    <td>@item.CommentTitle</td>
+                    <td>@item.CommentText</td>
+                </tr>
+            }
+        </table>
+        
+    </main>
+    @await Html.PartialAsync("~/Views/Home/PartialAddComment.cshtml")
+</body>
+</html>
+

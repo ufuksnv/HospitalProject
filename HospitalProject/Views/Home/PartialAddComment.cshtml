@@ -1,0 +1,30 @@
+﻿
+<div class="form-group">
+    <br />
+    <h3 class="text-primary">Yorum Yaz</h3>
+
+    <div class="">
+        <form asp-action="PartialAddComment" asp-controller="Home" method="post">
+            <div class="form-row">
+
+                <div class="col-3">
+                    <input type="text" class="form-control" name="CommentTitle" placeholder="Başlık Giriniz" required="">
+                </div>
+                
+                <div class="col-7">
+                    <input type="text" class="form-control" name="CommentMail" placeholder="E-Mail Adresiniz" value="" required="">
+                </div>                
+                
+            </div>
+            <div>
+                <textarea class="form-control" name="CommentText" placeholder="Yorumunuz..." required=""></textarea>
+            </div>
+            <br />
+
+            <button type="submit" class="btn btn-primary btn-lg btn-block">Yorum Yap</button>
+        </form>
+
+    </div>
+
+
+</div>

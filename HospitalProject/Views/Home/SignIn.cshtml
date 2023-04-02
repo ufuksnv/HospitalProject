@@ -1,0 +1,60 @@
+﻿@model SignInViewModel
+@{
+    ViewData["Title"] = "SignIn";
+}
+
+<div class="row">
+    <div class="col-md-4 offset-md-4">
+        <h2>Kullanıcı Giriş</h2>
+
+        @if ((TempData["ErrorMessage"] != null))
+        {
+            <div class="alert alert-info" role="alert">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+        @if ((TempData["LockedOutMessage"] != null))
+        {
+            <div class="alert alert-info" role="alert">
+                @TempData["LockedOutMessage"]
+            </div>
+        }
+
+        <form asp-controller="Home" asp-action="SignIn" method="post">
+            <div class="mb-3">
+                <label for="Email" class="form-label" asp-for="Email"></label>
+                <input class="form-control" asp-for="Email">
+                <span class="text-danger" asp-validation-for="Email"></span>
+
+            </div>
+            <div class="mb-3">
+                <label for="Password" class="form-label" asp-for="Password"></label>
+                <input type="password" class="form-control" asp-for="Password">
+                <span class="text-danger" asp-validation-for="Password"></span>
+            </div>
+
+            <div class="row">
+                <div class="col col-md-6">
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" asp-for="RememberMe">
+                        <label class="form-check-label" for="RememberMe">Beni Hatırla</label>
+                    </div>
+
+                </div>
+                <div class="col col-md-6">
+                    <a class="float-end" asp-controller="Home" asp-action="ForgetPassword">Şifremi Unuttum</a>
+                </div>
+            </div>
+
+
+
+            <button type="submit" class="btn btn-primary">Giriş Yap</button>
+
+        </form>
+
+        <a class="btn btn-info btn-block" asp-action="FacebookLogin">Facebook ile giriş yap</a>
+
+    </div>
+</div>
+

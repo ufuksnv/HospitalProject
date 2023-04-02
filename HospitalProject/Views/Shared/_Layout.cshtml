@@ -1,0 +1,88 @@
+﻿@using System.Security.Claims
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - AspNetCoreIdentityApp</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/AspNetCoreIdentityApp.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">HospitalProject</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Anasayfa</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="DoctorList">Doktorlarımız</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="CommentList">Yorumlarınız</a>
+                        </li>
+                    </ul>
+
+                    @if (User.Identity!.IsAuthenticated)
+                    {
+                        <ul class="navbar-nav me-0">
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    @User.Identity.Name
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" asp-controller="Member" asp-action="AppointmentList">Randevu Listesi</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Member" asp-action="Index">Kullanıcı Bilgileri</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Member" asp-action="PasswordChange">Şifre Değiştir</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Member" asp-action="UserEdit">Kullanıcı Güncelle</a></li>
+
+                                    @if (User.HasClaim(x => x.Type == ClaimTypes.Role && x.Value == "admin"))
+                                    {
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="UserList">Admin Paneli</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="AddAppointment">Randevu Oluştur</a></li>
+                                    }
+
+                                    <li><a class="dropdown-item" asp-controller="Member" asp-action="Logout">Çıkış Yap</a></li>
+
+                                </ul>
+
+                            </li>
+
+                        </ul>
+                    }
+                    else
+                    {
+                        <a class="btn btn-outline-success mx-1" asp-controller="Home" asp-action="SignIn">Giriş Yap</a>
+                        <a class="btn btn-outline-success" asp-controller="Home" asp-action="SignUp">Kayıt Ol</a>
+                    }
+                </div>
+
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2023 - HospitalProject - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

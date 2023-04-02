@@ -1,0 +1,40 @@
+﻿@model Hospital.Core.Models.Appointment
+@{
+    ViewData["Title"] = "AddAppointment";
+}
+<!DOCTYPE html>
+
+<html>
+<head>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>title1</title>
+
+
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap/dist/css/bootstrap.rtl.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap/dist/css/bootstrap.rtl.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
+
+</head>
+<body>
+<h1>Randevu Oluşturma Sayfası</h1>
+
+    @using (Html.BeginForm("AddAppointment", "Admin", FormMethod.Post))
+{
+    @Html.Label("Doktor Adını Giriniz")
+    @Html.TextBoxFor(x => x.DoctorName, new { @class = "form-control" })
+    @Html.ValidationMessageFor(x => x.DoctorName, "", new { @class = "text-success" })
+    <br />
+    <br />
+    @Html.Label("Randevu Tarihini Giriniz")
+    @Html.TextBoxFor(x => x.AppointmentDate, new { @class = "form-control" })
+    @Html.ValidationMessageFor(x => x.AppointmentDate, "", new { @class = "text-success" })
+    <br />
+    <br />
+    <button class="btn btn-outline-success">Kaydet</button>
+}
+  </body>
+  </html>
+
