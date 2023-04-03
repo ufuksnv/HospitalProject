@@ -7,6 +7,7 @@ using Hospital.Core.UnitOfWorks;
 using Hospital.Repository;
 using Hospital.Repository.Repositories;
 using Hospital.Repository.UnitOfWorks;
+using Hospital.Service.OptionsModels;
 using Hospital.Service.Services;
 using Hospital.Service.ValidationRules;
 using Microsoft.AspNetCore.Identity;
@@ -22,6 +23,7 @@ builder.Services.AddControllersWithViews().AddFluentValidation(x => x.RegisterVa
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped(typeof(IService<>), typeof(Service<>));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 
 //Database 
@@ -38,6 +40,9 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 {
     options.TokenLifespan = TimeSpan.FromHours(2);
 });
+
+//appsettings configuration
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
 //AddIdentity
 builder.Services.AddIdentity<AppUser, AppRole>(options =>
@@ -57,7 +62,9 @@ builder.Services.AddIdentity<AppUser, AppRole>(options =>
     options.Lockout.MaxFailedAccessAttempts = 3;
 
 
-}).AddEntityFrameworkStores<AppDbContext>();
+})
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
 
 //CookieSettings
 builder.Services.ConfigureApplicationCookie(opt =>

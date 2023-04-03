@@ -16,15 +16,16 @@ namespace HospitalProject.Controllers
         private readonly IService<Comment> _commentService;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly IEmailService _emailService;
 
-        public HomeController(ILogger<HomeController> logger, IService<Doctor> service, IService<Comment> commentService, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+        public HomeController(ILogger<HomeController> logger, IService<Doctor> service, IService<Comment> commentService, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailService emailService)
         {
             _logger = logger;
             _doctorService = service;
             _commentService = commentService;
             _userManager = userManager;
             _signInManager = signInManager;
-
+            _emailService = emailService;
         }
 
        // kalanlar : üye randevu al, üye randevuarı gör, admin randevu hazırla, yorumları pasif yap
@@ -110,7 +111,34 @@ namespace HospitalProject.Controllers
 
         }
 
+        [HttpGet]
+        public IActionResult ForgetPassword()
+        {
+            return View();
+        }
 
+        [HttpPost]
+        public async Task<IActionResult> ForgetPassword(ForgetPasswordViewModel request)
+        {
+            var hasUser = await _userManager.FindByEmailAsync(request.Email);
+
+            if (hasUser == null)
+            {
+                TempData["ForgetErrorMessage"] = "Bu email adresine sahip kullanıcı bulunamadı.";
+                return View();
+            }
+
+            string passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(hasUser);
+
+            var passwordResetLink = Url.Action("ResetPassword", "Home", new
+            { userId = hasUser.Id, Token = passwordResetToken }, HttpContext.Request.Scheme);
+
+            //
+            await _emailService.SendResetPasswordEmail(passwordResetLink, hasUser.Email);
+
+            TempData["success"] = "Şifre yenileme linki, eposta adresinize gönderilmiştir.";
+            return RedirectToAction(nameof(ForgetPassword));
+        }
 
 
         public async Task <IActionResult> DoctorList()
