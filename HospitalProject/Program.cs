@@ -9,6 +9,7 @@ using Hospital.Repository.Repositories;
 using Hospital.Repository.UnitOfWorks;
 using Hospital.Service.Services;
 using Hospital.Service.ValidationRules;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
@@ -30,6 +31,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     {
         sqlOptions.MigrationsAssembly(Assembly.GetAssembly(typeof(AppDbContext)).GetName().Name);
     });
+});
+
+//ForgetPasswordToken
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromHours(2);
 });
 
 //AddIdentity
