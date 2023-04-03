@@ -110,6 +110,9 @@ namespace HospitalProject.Controllers
 
         }
 
+
+
+
         public async Task <IActionResult> DoctorList()
         {
             var request = await _doctorService.GetAllAsync();
