@@ -12,14 +12,14 @@ namespace HospitalProject.Controllers
         private readonly SignInManager<AppUser> _signInManager;
         private readonly UserManager<AppUser> _userManager;
         private readonly IService<Appointment> _appointmentService;
-        
+        private readonly IEmailService _emailService;
 
-        public MemberController( SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, IService<Appointment> appointmentService)
+        public MemberController( SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, IService<Appointment> appointmentService, IEmailService emailService)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _appointmentService = appointmentService;
-            
+            _emailService = emailService;
         }
        
 
@@ -99,6 +99,7 @@ namespace HospitalProject.Controllers
         {
             var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name);
             var UserId = currentUser.Id;
+            var UserMail = currentUser.Email;
 
             var request = await _appointmentService.GetByIdAsync(id);
             request.AcceptanceDate = DateTime.Now;
@@ -107,6 +108,8 @@ namespace HospitalProject.Controllers
             request.AppUserId = UserId;
 
             await _appointmentService.UpdateAsync(request);
+
+            await _emailService.SendTakeAppointmentEmail(UserMail);
 
             return RedirectToAction("AppointmentList", "Member");
 

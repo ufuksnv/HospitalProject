@@ -43,5 +43,29 @@ namespace Hospital.Service.Services
 
             await smptClient.SendMailAsync(mailMessage);
         }
+
+        public async Task SendTakeAppointmentEmail(string toEmail)
+        {
+            var smptClient = new SmtpClient();
+
+            smptClient.Host = _emailSettings.Host;
+            smptClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+            smptClient.UseDefaultCredentials = false;
+            smptClient.Port = 587;
+            smptClient.Credentials = new NetworkCredential(_emailSettings.Email, _emailSettings.Password);
+            smptClient.EnableSsl = true;
+
+            var mailMessage = new MailMessage();
+
+            mailMessage.From = new MailAddress(_emailSettings.Email);
+            mailMessage.To.Add(toEmail);
+
+            mailMessage.Subject = "Randevu Bilgilendirme";
+            mailMessage.Body = @$"<h4>Randevunuz kayıt edilmiştir</h4>";
+           
+            mailMessage.IsBodyHtml = true;
+
+            await smptClient.SendMailAsync(mailMessage);
+        }
     }
 }
