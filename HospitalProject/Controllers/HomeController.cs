@@ -140,6 +140,48 @@ namespace HospitalProject.Controllers
             return RedirectToAction(nameof(ForgetPassword));
         }
 
+        public IActionResult ResetPassword(string userId, string token)
+        {
+            TempData["userId"] = userId;
+            TempData["token"] = token;
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel request)
+        {
+            string userId = TempData["userId"]!.ToString();
+            string token = TempData["token"]!.ToString();
+
+            if (userId == null || token == null)
+            {
+                throw new Exception("Bir hata meydana geldi");
+            }
+
+            var hasUser = await _userManager.FindByIdAsync(userId);
+            if (hasUser == null)
+            {
+                ModelState.AddModelError(string.Empty, "Kullanıcı bulunamadı");
+            }
+
+            IdentityResult result = await _userManager.ResetPasswordAsync(hasUser, token, request.Password);
+            if (result.Succeeded)
+            {
+                TempData["SuccessMessage"] = "Şifreniz başarıyla yenilenmiştir";
+            }
+            else
+            {
+                foreach (IdentityError item in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, item.Description);
+                }
+            }
+            return View();
+        }
+
+
+
 
         public async Task <IActionResult> DoctorList()
         {
