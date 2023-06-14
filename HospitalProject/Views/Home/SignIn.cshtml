@@ -20,6 +20,13 @@
             </div>
         }
 
+        @if ((TempData["ConfirmMessage"] != null))
+        {
+                    <div class="alert alert-info" role="alert">
+                @TempData["ConfirmMessage"]
+                    </div>
+        }
+
         <form asp-controller="Home" asp-action="SignIn" method="post">
             <div class="mb-3">
                 <label for="Email" class="form-label" asp-for="Email"></label>
@@ -53,7 +60,7 @@
 
         </form>
 
-        <a class="btn btn-info btn-block" asp-action="FacebookLogin">Facebook ile giriş yap</a>
+        <a class="btn btn-info btn-block" asp-action="GoogleLogin">Google ile giriş yap</a>
 
     </div>
 </div>

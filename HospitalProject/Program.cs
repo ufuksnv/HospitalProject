@@ -12,6 +12,7 @@ using Hospital.Service.Services;
 using Hospital.Service.ValidationRules;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +35,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         sqlOptions.MigrationsAssembly(Assembly.GetAssembly(typeof(AppDbContext)).GetName().Name);
     });
 });
+
+//fileSettings
+builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
 
 //ForgetPasswordToken
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>

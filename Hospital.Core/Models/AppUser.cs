@@ -12,6 +12,10 @@ namespace Hospital.Core.Models
         public DateTime? BirthDay { get; set; }
         public int? Size { get; set; }
         public int? weight { get; set; }
+        public string? Picture { get; set; }
+        public string? Phone { get; set; }
+
+        public int? ConfirmCode { get; set; }
 
         //public List<Appointment>? Appointments { get; set; }
         public ICollection<Appointment>? Appointments { get; set; }

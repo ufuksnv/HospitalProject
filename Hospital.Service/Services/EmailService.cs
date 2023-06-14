@@ -67,5 +67,30 @@ namespace Hospital.Service.Services
 
             await smptClient.SendMailAsync(mailMessage);
         }
+
+        public async Task SendConfirmCodeEmail(int ConfirmCode, string ToEmail)
+        {
+            var smptClient = new SmtpClient();
+
+            smptClient.Host = _emailSettings.Host;
+            smptClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+            smptClient.UseDefaultCredentials = false;
+            smptClient.Port = 587;
+            smptClient.Credentials = new NetworkCredential(_emailSettings.Email, _emailSettings.Password);
+            smptClient.EnableSsl = true;
+
+            var mailMessage = new MailMessage();
+
+            mailMessage.From = new MailAddress(_emailSettings.Email);
+            mailMessage.To.Add(ToEmail);
+
+            mailMessage.Subject = "Localhost Üye Aktivasyon Linki";
+            mailMessage.Body = @$"<h4>Hesabınızı aktif etmek için aşağıdaki kodu kullanınız</h4>
+            <p><a>Üye aktivasyon kodu: {ConfirmCode}</a></p>";
+
+            mailMessage.IsBodyHtml = true;
+
+            await smptClient.SendMailAsync(mailMessage);
+        }
     }
 }

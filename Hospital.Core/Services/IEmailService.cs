@@ -10,5 +10,7 @@ namespace Hospital.Core.Services
     {
         Task SendResetPasswordEmail(string resetPasswordEmailLink, string ToEmail);
         Task SendTakeAppointmentEmail(string toEmail);
+        public Task SendConfirmCodeEmail(int ConfirmCode, string ToEmail);
+
     }
 }

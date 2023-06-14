@@ -3,6 +3,25 @@
     ViewData["Title"] = "Index";
 }
 
+
+<div class="row">
+
+    <div class="col-md-4 offset-md-4">
+
+        @if(String.IsNullOrEmpty(Model.PictureUrl))
+        {
+            <img class="rounded" style="width:300px" src="/userpictures/default_user_picture.png" />
+        }
+        else
+        {
+            <img class="rounded" style="width:300px" src="/userpictures/@(Model.PictureUrl)" />
+        }
+
+    </div>
+</div>
+
+
+
 <div class="row">
 
     <div class="col-md-6 offset-md-3">

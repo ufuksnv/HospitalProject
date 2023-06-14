@@ -6,6 +6,7 @@ using HospitalProject.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace HospitalProject.Controllers
 {
@@ -28,12 +29,7 @@ namespace HospitalProject.Controllers
             _emailService = emailService;
         }
 
-       // kalanlar : üye randevu al, üye randevuarı gör, admin randevu hazırla, yorumları pasif yap
-       // üye mesaj atar ve randevu tarihini verir, admin randevu bilgilerini girer(vazgeçtim)
-
-        //kalanlar: randevu ekleme tamamlandı, üye randevuları görebiliyor, üye randevuları alma eklenecek(güncelleme alım tarihi şimdi statu false title müsait değil)
-        //yorumları pasif yap eklenebilir
-
+     
 
         public IActionResult Index()
         {
@@ -51,19 +47,27 @@ namespace HospitalProject.Controllers
         {
             if (ModelState.IsValid)
             {
+                Random random = new Random();
+                int randomKey = random.Next(100000, 1000000);
+
                 AppUser user = new AppUser()
                 {
                     UserName = request.UserName,
                     PhoneNumber = request.Phone,
-                    Email = request.Email
+                    Email = request.Email,
+                    ConfirmCode = randomKey
                 };
 
                 var identityResult = await _userManager.CreateAsync(user, request.Password);
 
                 if (identityResult.Succeeded)
                 {
-                    TempData["SuccessMessage"] = "Üyelik kayıt işlemi başarıyla gerçekleşmiştir";
-                    return RedirectToAction(nameof(HomeController.SignUp));
+                    await _emailService.SendConfirmCodeEmail(randomKey, request.Email!);
+                    //TempData["SuccessMessage"] = "Üyelik kayıt işlemi başarıyla gerçekleşmiştir";
+                    TempData["Mail"] = request.Email;
+
+                    //return RedirectToAction(nameof(HomeController.SignUp));
+                    return RedirectToAction(nameof(HomeController.CodeConfirm));
                 }
 
                 foreach (IdentityError item in identityResult.Errors)
@@ -73,6 +77,28 @@ namespace HospitalProject.Controllers
 
             }
             return View(request);
+        }
+
+        [HttpGet]
+        public IActionResult CodeConfirm()
+        {
+            var value = TempData["Mail"];
+            ViewBag.v = value;
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CodeConfirm(ConfirmMailViewModel confirmMailViewModel)
+        {
+            var user = await _userManager.FindByEmailAsync(confirmMailViewModel.Mail);
+            if (user.ConfirmCode == confirmMailViewModel.ConfirmCode)
+            {
+                user.EmailConfirmed = true;
+                await _userManager.UpdateAsync(user);
+                return RedirectToAction(nameof(HomeController.SignIn));
+            }
+            return View();
         }
 
         [HttpGet]
@@ -90,6 +116,12 @@ namespace HospitalProject.Controllers
             if (hasUser == null)
             {
                 TempData["ErrorMessage"] = "Kullanıcı adınız veya parolanız hatalı lütfen tekrar deneyiniz.";
+                return View();
+            }
+
+            if (hasUser.EmailConfirmed == false)
+            {
+                TempData["ConfirmMessage"] = "Lütfen hesabınızı onaylayınız.";
                 return View();
             }
 
@@ -209,6 +241,66 @@ namespace HospitalProject.Controllers
             return RedirectToAction("CommentList", "Home");
 
         }
+
+
+        public async Task<IActionResult> ExternalResponse(string ReturnUrl = "/")
+        {
+            ExternalLoginInfo info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                return RedirectToAction("SignIn");
+            }
+            else
+            {
+                Microsoft.AspNetCore.Identity.SignInResult result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, true);
+                if (result.Succeeded)
+                {
+                    return Redirect(ReturnUrl);
+                }
+                else
+                {
+                    AppUser user = new AppUser();
+
+                    user.Email = info.Principal.FindFirst(ClaimTypes.Email)!.Value;
+                    string ExternalUserId = info.Principal.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+
+                    if (info.Principal.HasClaim(x => x.Type == ClaimTypes.Name))
+                    {
+                        string userName = info.Principal.FindFirst(ClaimTypes.Name)!.Value;
+                        userName = userName.Replace(' ', '-').ToLower() + ExternalUserId.Substring(0, 5).ToString();
+                        user.UserName = userName;
+                    }
+                    else
+                    {
+                        user.UserName = info.Principal.FindFirst(ClaimTypes.Email)!.Value;
+                    }
+
+                    IdentityResult createResult = await _userManager.CreateAsync(user);
+                    if (createResult.Succeeded)
+                    {
+                        IdentityResult loginResult = await _userManager.AddLoginAsync(user, info);
+
+                        if (loginResult.Succeeded)
+                        {
+                            await _signInManager.SignInAsync(user, true);
+                            return Redirect(ReturnUrl);
+                        }
+                    }
+                    else
+                    {
+                        foreach (IdentityError item in createResult.Errors)
+                        {
+                            ModelState.AddModelError(string.Empty, item.Description);
+                        }
+                    }
+
+                }
+            }
+
+            return RedirectToAction("Error");
+        }
+
+
 
 
         public IActionResult Privacy()

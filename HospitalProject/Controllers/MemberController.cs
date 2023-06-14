@@ -4,6 +4,8 @@ using Hospital.Service.Services;
 using HospitalProject.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.FileProviders;
 
 namespace HospitalProject.Controllers
 {
@@ -13,15 +15,17 @@ namespace HospitalProject.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly IService<Appointment> _appointmentService;
         private readonly IEmailService _emailService;
+        private readonly IFileProvider _fileProvider;
 
-        public MemberController( SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, IService<Appointment> appointmentService, IEmailService emailService)
+        public MemberController(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, IService<Appointment> appointmentService, IEmailService emailService, IFileProvider fileProvider)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _appointmentService = appointmentService;
             _emailService = emailService;
+            _fileProvider = fileProvider;
         }
-       
+
 
         public async Task<IActionResult> Index()
         {
@@ -31,9 +35,92 @@ namespace HospitalProject.Controllers
                 Email = currentUser.Email,
                 UserName = currentUser.UserName,
                 PhoneNumber = currentUser.PhoneNumber,
+                PictureUrl = currentUser.Picture,               
+
             };
 
             return View(userViewModel);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> UserEdit()
+        {
+            
+            var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name);
+
+            var userEditViewModel = new UserEditViewModel()
+            {
+                UserName = currentUser.UserName,
+                Email = currentUser.Email,
+                Phone = currentUser.PhoneNumber,
+                BirthDay = currentUser.BirthDay,             
+            };
+
+            return View(userEditViewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UserEdit(UserEditViewModel request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+
+            var currentUser = await _userManager.FindByNameAsync(User.Identity!.Name);
+
+            currentUser.UserName = request.UserName;
+            currentUser.Email = request.Email;
+            currentUser.PhoneNumber = request.Phone;
+            currentUser.BirthDay = request.BirthDay;
+            
+
+            //addPicture
+            if (request.Picture != null && request.Picture.Length > 0)
+            {
+                var wwwrootFolder = _fileProvider.GetDirectoryContents("wwwroot");
+
+                string randomFileName = $"{Guid.NewGuid().ToString()}{Path.GetExtension(request.Picture.FileName)}";
+
+                var newPicturePath = Path.Combine(wwwrootFolder!.First(x => x.Name == "userpictures").PhysicalPath!, randomFileName);
+
+                using var stream = new FileStream(newPicturePath, FileMode.Create);
+
+                await request.Picture.CopyToAsync(stream);
+
+                currentUser.Picture = randomFileName;
+
+            }
+            //addPictureEnd
+
+
+            var updateToUserResult = await _userManager.UpdateAsync(currentUser);
+
+            if (!updateToUserResult.Succeeded)
+            {
+                foreach (IdentityError item in updateToUserResult.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, item.Description);
+                    return View();
+                }
+            }
+
+           // await _userManager.UpdateSecurityStampAsync(currentUser);
+            await _signInManager.SignOutAsync();
+            await _signInManager.SignInAsync(currentUser, true);
+
+            TempData["SuccessMessage"] = "Bilgileriniz güncellenmiştir";
+
+
+            var userEditViewModel = new UserEditViewModel()
+            {
+                UserName = currentUser.UserName,
+                Email = currentUser.Email,
+                Phone = currentUser.PhoneNumber,
+                BirthDay = currentUser.BirthDay,              
+            };
+
+            return View(userEditViewModel);
         }
 
         [HttpGet]

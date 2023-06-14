@@ -3,24 +3,29 @@ using Hospital.Core.Models;
 using Hospital.Core.Services;
 using Hospital.Service.ValidationRules;
 using HospitalProject.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 
 namespace HospitalProject.Controllers
 {
+    [Authorize(Roles = "admin")]
     public class AdminController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<AppRole> _roleManager;
         private readonly IService<Appointment> _appointmentService;
+        private readonly IService<Comment> _commentService;
 
-        public AdminController(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager, IService<Appointment> appointmentService)
+        public AdminController(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager, IService<Appointment> appointmentService, IService<Comment> commentService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _appointmentService = appointmentService;
+            _commentService = commentService;
         }
        
         public async Task<IActionResult> Index()
@@ -186,5 +191,8 @@ namespace HospitalProject.Controllers
 
         }
 
+     
+
+      
     }
 }
