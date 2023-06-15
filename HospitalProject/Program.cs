@@ -56,6 +56,15 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
     options.TokenLifespan = TimeSpan.FromHours(2);
 });
 
+//googleAuth
+var configuration = builder.Configuration;
+
+builder.Services.AddAuthentication().AddGoogle(opts =>
+{
+    opts.ClientId = configuration["Authentication:Google:ClientID"];
+    opts.ClientSecret = configuration["Authentication:Google:ClientSecret"];
+});
+
 //AddIdentity
 builder.Services.AddIdentity<AppUser, AppRole>(options =>
 {
