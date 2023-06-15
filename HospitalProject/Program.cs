@@ -36,6 +36,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     });
 });
 
+
+
 //fileSettings
 builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory()));
 
@@ -47,6 +49,12 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 
 //appsettings configuration
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
+//ForgetPasswordToken
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromHours(2);
+});
 
 //AddIdentity
 builder.Services.AddIdentity<AppUser, AppRole>(options =>
